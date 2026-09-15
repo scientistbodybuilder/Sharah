@@ -29,25 +29,6 @@ A contract is Haram if essential terms (price, delivery, quantity, risk allocati
 5. Are early payment discounts clearly offered, or is prepayment forbidden?
 6. Is the profit-share (in Musharaka) calculated on net profit, gross revenue, or a fixed percentage—and is formula stated?
 
-## Shariah Status
-- **Verdict**: Haram (Gharar in essential terms)
-- **Confidence Level**: High (though some gharar is tolerated if benefit > harm; degree varies by scholar)
-
-## Evidence & Citations
-- **Hadith (Sahih Muslim)**: "Messenger forbids sales involving gharar"
-- **AAOIFI Shariah Standard 2**: Gharar defined as "unascertainable risk or uncertainty affecting essential contract terms"
-- **BNM Guidelines (2024)**: "BNPL late payment charges must be clearly defined; vague penalties constitute Gharar"
-- **Malaysia SAC Ruling**: Ambiguous late fees = Gharar; "See T&Cs" without disclosure = Gharar
-- **Islamic Finance Singapore FAQ**: Atome's late fees flagged as Gharar (no clear formula)
-- **ISRA Research**: "Product descriptions must include exact cost, profit, and risk allocation; marketing alone is insufficient"
-
-## SHARAH Engine Use
-- **Applicable to**: all contract types (sale_like, partnership_like, loan_like)
-- **Confidence impact**: If detected → -10 to -20 (medium penalty; not disqualifying alone, but compounds other issues)
-- **Trigger keywords**: ["uncertain", "vague", "up to", "subject to", "may vary", "terms apply", "discretion"]
-- **Sample verdicts**:
-  - `IF description is vague OR missing cost/price/profit_margin OR "up to X% fee" (unspecified) THEN issue="Gharar (uncertainty)" principle_tag="gharar" confidence_adjust="-15"`
-  - `IF late_fees mentioned BUT late_fee_amount NOT specified THEN issue="Gharar (penalty amount unclear)" principle_tag="gharar" confidence_adjust="-10"`
 
 ## Post-MVP LLM Use
 - LLM can ask: "Can you clarify the exact cost, profit margin, and risk allocation?"

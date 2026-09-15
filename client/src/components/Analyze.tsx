@@ -178,8 +178,7 @@ const Analyze = () => {
 
         <div className="feature-grid">
           <Feature icon={<ShieldCheck />} title="AAOIFI Shariah Standards">
-            Evaluates Riba al-Nasi'ah, interest capitalization, and default
-            penalties against Standard No. 8 &amp; 9.
+            Evaluates Documents against Shariah Standards No. 19 &amp; 31.
           </Feature>
           <Feature icon={<ScanLine />} title="Instant Clause Breakdown">
             Processes agreements in under 30 seconds, flagging prohibited,

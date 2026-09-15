@@ -12,7 +12,6 @@ from fastapi.responses import JSONResponse
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from transformers import AutoTokenizer
 
-from routes import shariah_router
 from engine.engine import llm_verification
 from engine.rulings import rulings
 from engine.sentence_embeddings import get_ruling_embeddings, embed_document_chunk, max_ruling_chunk_similarity
@@ -50,7 +49,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(shariah_router)
+# app.include_router(shariah_router)
 
 def get_chunk_page(chunk: str, text_pages: list) -> int:
     for i, page_info in enumerate(text_pages):

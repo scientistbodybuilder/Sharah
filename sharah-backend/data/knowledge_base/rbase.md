@@ -26,24 +26,6 @@ Any premium charged on money (qard) — whether called "interest," "fee," "charg
 4. Does the creditor own the underlying good, or only the debt claim?
 5. Is there **shared risk** if the borrower's business fails, or does creditor recover full amount regardless?
 
-## Shariah Status
-- **Verdict**: Haram (Fixed interest on any loan of money)
-- **Confidence Level**: Very High (unanimous across all madhabs; Quranic foundation)
-
-## Evidence & Citations
-- **Qur'an 2:275–276**: "Allah has forbidden interest (riba) and permitted sale (bay')"
-- **AAOIFI Shariah Standard 1**: Riba is "any excess over the original amount of a loan"
-- **State Bank of Pakistan (2024)**: "Riba encompasses all interest on loans, regardless of form or purpose"
-- **OIC Fiqh Academy**: Consensus that interest on money is prohibited in all forms
-- **IFSB Core Principles (IFSB-17)**: Banks must ensure all revenue is "asset-backed" or "service-based," never pure lending charges
-
-## SHARAH Engine Use
-- **Applicable to**: loan_like, any contract with debt element
-- **Confidence impact**: If detected with high certainty → -50 to -80 (depends on severity); if interest_rate > 0 AND profit_sharing_pct == 0 → Flag "Riba risk" immediately
-- **Trigger keywords**: ["interest", "APR", "annual rate", "fixed repayment", "accrues"]
-- **Sample verdicts**:
-  - `IF interest_rate > 0 AND profit_sharing_pct == 0 THEN issue="Riba detected (fixed interest on loan)" principle_tag="riba" confidence_adjust="-50" is_halal=false`
-  - `IF description contains ("interest accrues" OR "compound interest" OR "APR") AND interest_rate > 0 THEN is_halal=false reason="Pure interest-based loan"`
 
 ## Post-MVP LLM Use
 - LLM **forbidden** to override this verdict or say "maybe riba is OK if..."
