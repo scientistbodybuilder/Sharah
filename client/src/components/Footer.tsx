@@ -1,25 +1,26 @@
-import { useState } from 'react'
-import { HashLink } from 'react-router-hash-link'
+// import { useState } from 'react'
+// import { HashLink } from 'react-router-hash-link'
 
 const Footer = () => {
-    const [loading, setLoading] = useState(false);
-    const sendMessage = async (data: any) => {
-        console.log('Sending message: ',data)
-        setLoading(true)
-        try {
-        // const result = await sendMessageContactForm(data)
-        // if (result.success) {
-        //     setMessageSentSuccess(true)
-        // } else {
-        //     setMessageSentSuccess(false)
-        // }
-        // } catch (e) {
-        // console.error('Failed to send contact message ', e)
-        // setMessageSentSuccess(false)
-        } finally {
-        setLoading(false)
-        }
-    }
+    // const [loading, setLoading] = useState(false);
+    // const sendMessage = async (data: any) => {
+    //     console.log('Sending message: ',data)
+    //     setLoading(true)
+    //     try {
+    //       setLoading(true)
+    //     // const result = await sendMessageContactForm(data)
+    //     // if (result.success) {
+    //     //     setMessageSentSuccess(true)
+    //     // } else {
+    //     //     setMessageSentSuccess(false)
+    //     // }
+    //     // } catch (e) {
+    //     // console.error('Failed to send contact message ', e)
+    //     // setMessageSentSuccess(false)
+    //     } finally {
+    //     setLoading(false)
+    //     }
+    // }
     return(
         <footer className="bg-(--background-dark) border border-t-(--accent-color)/40 py-1 px-3 h-auto min-h-[140px] box-border w-full text-(--accent-color)">
             <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
