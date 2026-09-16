@@ -39,7 +39,8 @@ export const uploadFile = async (file: File, reUpload: boolean) => {
                 confidence: item?.confidence,
                 suggestion: item?.suggestion,
                 summary: item?.summary,
-                reasoning: item?.reasoning
+                reasoning: item?.reasoning,
+                citation: item?.citation
             }))
         })
         //upload file key to session storage

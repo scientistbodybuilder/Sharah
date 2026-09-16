@@ -221,7 +221,8 @@ async def llm_verification(ruling: str, chunk: str, chunk_page: int):
             "suggestion": "compliant" | "non-compliant" | "uncertain",
             "confidence": 0-100,
             "summary": "summary explaining findings with concise references to the context and the passage",
-            "reasoning": "Detailed explanation of the analysis, referencing the context document"
+            "reasoning": "Detailed explanation of the analysis, referencing the context document",
+            "citation": "Citation on the relevant Shariah Standard from the knowledge base"
         }}
         """
 

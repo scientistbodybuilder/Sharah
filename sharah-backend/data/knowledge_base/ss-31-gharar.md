@@ -1,5 +1,6 @@
 ## AAOIFI Shariah Standard - 31
 ## Definitions
+Riba — Interest or usury; the central prohibition Qard rules are designed to avoid.
 
 ## 1. Scope of the Standard
 
@@ -154,3 +155,6 @@ A contract becomes null and void if it contains a condition that causes Gharar i
 ## 8. Date of Issuance of the Standard
 
 This Standard was issued on 26 Sha'ban 1428 A.H., corresponding to 9 September 2007 A.D.
+
+## LLM Citing
+- For citation, cite the `AAOIFI Shariah Standard - 31, Statement of the Standard, ${statement number and title}}`

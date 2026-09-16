@@ -24,6 +24,7 @@ export interface ClauseCardProps {
     ruling: string
     summary: string
     reasoning: string
+    citation?: string
     suggestion: string
     chunk: string
     chunkPage: number
@@ -62,7 +63,7 @@ function SuggestionIcon (suggestion: string) {
     }
 }
 
-const ClauseCard = ({ confidence, ruling, summary, reasoning, suggestion, chunk, chunkPage }: ClauseCardProps) => {
+const ClauseCard = ({ confidence, ruling, summary, reasoning, citation, suggestion, chunk, chunkPage }: ClauseCardProps) => {
 
 
 
@@ -96,6 +97,7 @@ const ClauseCard = ({ confidence, ruling, summary, reasoning, suggestion, chunk,
                             <p className="text-muted-foreground text-sm"><span className="text-black font-semibold">Ruling:</span> {ruling.toUpperCase()}</p>
                             <p className={`text-muted-foreground text-sm font-semibold`}><span className="text-black font-semibold">Confidence:</span> {confidence}%</p>
                             <p className="text-muted-foreground text-sm"><span className="text-black font-semibold">Reasoning:</span> {reasoning}</p>
+                            <p className="text-muted-foreground text-sm"><span className="text-black font-semibold">Citation:</span> {citation}</p>
                         </DialogDescription>
                     </DialogContent>
                 </Dialog>
