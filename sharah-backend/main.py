@@ -5,6 +5,7 @@ import os
 import fitz  # PyMuPDF
 from io import BytesIO
 from langchain_core.documents import Document
+from dotenv import load_dotenv
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,10 +17,13 @@ from engine.engine import llm_verification
 from engine.rulings import rulings
 from engine.sentence_embeddings import get_ruling_embeddings, embed_document_chunk, max_ruling_chunk_similarity
 
+load_dotenv()
+
 logging.basicConfig(
     level=logging.DEBUG if os.getenv("DEBUG", "false").lower() == "true" else logging.INFO
 )
 logger = logging.getLogger(__name__)
+frontend_url=os.getenv("FRONTEND_URL")
 
 app = FastAPI(
     title="SHARAH API",
@@ -37,9 +41,7 @@ text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
 # CORS: allow frontend origins (local + production)
 _origins = [
     "http://localhost:5173",
-    "http://127.0.0.1:3000",
-    "https://sharah-frontend.vercel.app",
-    "https://sharah.vercel.app",
+    frontend_url
 ]
 app.add_middleware(
     CORSMiddleware,
