@@ -1,5 +1,5 @@
 import axios from "axios"
-const API_URL = import.meta.env.VITE_API_URL
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 // console.log(API_URL)
 
 export const hashFile = (file: File, reUpload: boolean) => {
@@ -26,7 +26,7 @@ export const uploadFile = async (file: File, reUpload: boolean) => {
             "Content-Type": "multipart/form-data"
         }
     });
-    // console.log('file upload response:', response);
+    console.log('file upload response:', response);
     if (response.status >= 200 && response.status < 300) {
         console.log("File analyzed successfully", response.data)
         let obj = {} as Record<string, any[]>
