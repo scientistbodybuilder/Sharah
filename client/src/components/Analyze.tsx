@@ -27,6 +27,7 @@ interface ErrorTypes {
 const Analyze = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState("");
+  const [displayFileName, setDisplayFileName] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<ErrorTypes>({});
   // const [loading, setLoading] = useState(false);
@@ -61,7 +62,10 @@ const Analyze = () => {
       onSuccess: (data) => {
           console.log('analyze result:', data)
           setResults(data.data)
+          setDisplayFileName(fileName)
           queryClient.setQueryData(['analysis', data.hash], data.data)
+          setSelectedFile(null)
+          setFileName("")
       },
       onError: (err) => {
           console.error('Error uploading file:', err)
@@ -73,7 +77,6 @@ const Analyze = () => {
       if (selectedFile) {
         // 
         analyzeFile(selectedFile)
-        setSelectedFile(null)
         setExistingCachedData(null) // reset
       }
   }
@@ -87,9 +90,9 @@ const Analyze = () => {
   }
 
   return (
-    <main className="analyze-page min-h-[calc(100dvh-52px-140px)] grow flex flex-col items-center justify-center gap-4">
+    <main className="analyze-page min-h-[calc(100dvh-52px-140px)] grow flex flex-col items-center justify-start gap-4">
       <div className="w-full flex justify-start m-0 cursor-pointer">
-        <RecentUploadSheet setResults={setResults} setFileName={setFileName} />
+        <RecentUploadSheet setResults={setResults} setFileName={setDisplayFileName} />
       </div>
       
       <section className="audit-panel gap-2" aria-labelledby="upload-heading">
@@ -185,14 +188,13 @@ const Analyze = () => {
             conditional, and permissible terms.
           </Feature>
           <Feature icon={<FolderOpen />} title="Exportable Scholarly Memo">
-            Generates certified PDF audits with Fiqh citations ready to present
-            to Islamic scholars or imams.
+            Generates a PDF report with traceable citations to specific AAOIFI Shariah Standards.
           </Feature>
         </div>
       </section>
 
-      {fileName != "" && Object.keys(results).length > 0 && (
-        <ClauseBreakdown data={results} file={fileName} />
+      {displayFileName != "" && Object.keys(results).length > 0 && (
+        <ClauseBreakdown data={results} file={displayFileName} />
       )}
     </main>
   );
