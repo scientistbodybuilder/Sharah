@@ -209,7 +209,8 @@ async def llm_verification(ruling: str, chunk: str, chunk_page: int):
         content = f.read() # chunk content, will be knowledge base for llm
 
         system_prompt = f"""You are SHARAH, an expert Islamic finance compliance analyzer for student loan agreements. 
-        Your task is to analyze a passage from a student loan agreement for Shariah compliance.
+        Your task is to analyze a passage from a student loan agreement for Shariah compliance. Reason purely based on the information from this knowledge base:
+                -- {content} --
         
         You must evaluate based on the principle of {ruling}
         
@@ -230,9 +231,6 @@ async def llm_verification(ruling: str, chunk: str, chunk_page: int):
         
         --- CONTRACT PASSAGE ---
         {chunk}
-        
-        --- RELEVANT SHARIAH KNOWLEDGE BASE ---
-        {content}
         
         Provide your Shariah compliance analysis in JSON format."""
 
