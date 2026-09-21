@@ -1,62 +1,139 @@
-import axios from "axios"
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
-// console.log(API_URL)
+// import axios from "axios"
+// import { useQueryClient } from "@tanstack/react-query"
+// const queryClient = useQueryClient();
 
-export const hashFile = (file: File, reUpload: boolean) => {
-    const dateTime = new Date().toLocaleString()
-    const string_key = reUpload ? `${file.name}-${file.size}-${file.lastModified}-${dateTime}` : `${file.name}-${file.size}-${file.lastModified}`;
+// const test = true
+// const API_URL = test ? 'http://localhost:8000' : import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+// // console.log(API_URL)
 
-    let hash = 0x811c9dc5;
-    for (let i = 0; i < string_key.length; i++) {
-        hash ^= string_key.charCodeAt(i);
-        // 32-bit integer multiplication
-        hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
-    }
-    // Return unsigned 32-bit hex string, padded to 8 characters
-    return (hash >>> 0).toString(16).padStart(8, '0');
-}
+// export const hashFile = (file: File, reUpload: boolean, dateTime?: string) => {
+//     // const dateTime = dateTime || new Date().toLocaleString()
+//     const string_key = reUpload ? `${file.name}-${file.size}-${file.lastModified}-${dateTime}` : `${file.name}-${file.size}-${file.lastModified}`;
 
-export const uploadFile = async (file: File, reUpload: boolean) => {
-    const formData = new FormData();
-    formData.append("file", file);
+//     let hash = 0x811c9dc5;
+//     for (let i = 0; i < string_key.length; i++) {
+//         hash ^= string_key.charCodeAt(i);
+//         // 32-bit integer multiplication
+//         hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+//     }
+//     // Return unsigned 32-bit hex string, padded to 8 characters
+//     return (hash >>> 0).toString(16).padStart(8, '0');
+// }
 
-    const dateTime = new Date().toLocaleString()
-    const response = await axios.post(`${API_URL}/api/pipeline`, formData, {
-        headers: {
-            "Content-Type": "multipart/form-data"
-        }
-    });
-    console.log('file upload response:', response);
-    if (response.status >= 200 && response.status < 300) {
-        console.log("File analyzed successfully", response.data)
-        let obj = {} as Record<string, any[]>
-        const rulingData = response.data.data
-        Object.keys(rulingData).forEach((ruling) => {
-            obj[ruling] = rulingData[ruling].map((item: any) => ({
-                chunk: item?.metadata.chunk,
-                chunkPage: item?.metadata.chunk_page,
-                ruling: item?.metadata.ruling,
-                confidence: item?.confidence,
-                suggestion: item?.suggestion,
-                summary: item?.summary,
-                reasoning: item?.reasoning,
-                citation: item?.citation
-            }))
-        })
-        //upload file key to session storage
-        // const key = `${file.name}-${dateTime}`
-        const hash = hashFile(file, reUpload)
-        const keyObj = {
-            hash,
-            filename: file.name,
-            timestamp: dateTime
-        }
-        //current keys
-        const currentKeys = sessionStorage.getItem('recentUploads')
-        const updatedKeys = currentKeys ? [...JSON.parse(currentKeys), keyObj] : [keyObj]
-        sessionStorage.setItem('recentUploads', JSON.stringify(updatedKeys))
-        return { data: obj, hash }
-    } else {
-        throw new Error(response.data?.error || "Error analyzing file")
-    }
-}
+// export const uploadFile = async (file: File, reUpload: boolean) => {
+//     const formData = new FormData();
+//     formData.append("file", file);
+
+//     const dateTime = new Date().toLocaleString()
+//     const response = await axios.post(`${API_URL}/api/test`, formData, {
+//         headers: {
+//             "Content-Type": "multipart/form-data"
+//         }
+//     });
+//     console.log('file upload response:', response);
+//     if (response.status >= 200 && response.status < 300) {
+//         console.log("File analyzed successfully", response.data)
+//         let obj = {} as Record<string, any[]>
+//         const rulingData = response.data.data
+//         Object.keys(rulingData).forEach((ruling) => {
+//             obj[ruling] = rulingData[ruling].map((item: any) => ({
+//                 chunk: item?.metadata.chunk,
+//                 chunkPage: item?.metadata.chunk_page,
+//                 ruling: item?.metadata.ruling,
+//                 confidence: item?.confidence,
+//                 suggestion: item?.suggestion,
+//                 summary: item?.summary,
+//                 reasoning: item?.reasoning,
+//                 citation: item?.citation
+//             }))
+//         })
+//         //upload file key to session storage
+//         // const key = `${file.name}-${dateTime}`
+//         const hash = hashFile(file, reUpload)
+//         const keyObj = {
+//             hash,
+//             filename: file.name,
+//             timestamp: dateTime
+//         }
+//         //current keys
+//         const currentKeys = sessionStorage.getItem('recentUploads')
+//         const updatedKeys = currentKeys ? [...JSON.parse(currentKeys), keyObj] : [keyObj]
+//         sessionStorage.setItem('recentUploads', JSON.stringify(updatedKeys))
+//         return { data: obj, hash }
+//     } else {
+//         throw new Error(response.data?.error || "Error analyzing file")
+//     }
+// }
+
+// export const uploadFileV2 = async (file: File, reUpload: boolean) => {
+//     const formData = new FormData();
+//     formData.append("file", file);
+
+//     const dateTime = new Date().toLocaleString()
+
+//     try {
+//         const response = await axios.post(`${API_URL}/api/stream`, formData, {
+//             headers: {
+//                 "Content-Type": "multipart/form-data",
+//                 "responseType": "stream"
+//             }
+//         });
+
+//         response.data.on('data', (chunk: Buffer) => {
+//             // Handle streaming data
+//             const data = JSON.parse(chunk.toString('utf-8'))
+//             let obj = {
+//                 chunk: data?.metadata.chunk,
+//                 chunkPage: data?.metadata.chunk_page,
+//                 ruling: data?.metadata.ruling,
+//                 confidence: data?.confidence,
+//                 suggestion: data?.suggestion,
+//                 summary: data?.summary,
+//                 reasoning: data?.reasoning,
+//                 citation: data?.citation
+//             }
+//             const ruling = data?.metadata.ruling
+//             // check whether the ruling result is already cached for this request
+//             const hash = hashFile(file, reUpload)
+
+//             const existingResults: Record<string, any> | undefined = queryClient.getQueryData(['analysis', hash])
+//             if (existingResults) {
+//                 const updatedResult = {...existingResults}
+//                 if (updatedResult[ruling]) {
+//                     updatedResult[ruling].push(obj)
+//                 } else {
+//                     updatedResult[ruling] = [obj]
+//                 }
+//                 //re-cache
+//                 queryClient.setQueryData(['analysis', hash], updatedResult)
+
+//             } else {
+//                 //initialize them
+//                 let initializedLLMResult = {} as Record<string,any>
+//                 initializedLLMResult[ruling] = [obj]
+//                 queryClient.setQueryData(['analysis', hash], initializedLLMResult)
+
+//                 const keyObj = {
+//                     hash,
+//                     filename: file.name,
+//                     timestamp: dateTime
+//                 }
+//                 const currentKeys = sessionStorage.getItem('recentUploads')
+//                 const updatedKeys = currentKeys ? [...JSON.parse(currentKeys), keyObj] : [keyObj]
+//                 sessionStorage.setItem('recentUploads', JSON.stringify(updatedKeys))
+//             }
+            
+
+
+
+
+
+
+//         });
+//     } catch (err) {
+//         console.error('Error uploading file with stream:', err)
+//         throw new Error("Error analyzing file")
+//     }
+    
+
+// }

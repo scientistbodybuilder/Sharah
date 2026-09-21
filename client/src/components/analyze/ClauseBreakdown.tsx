@@ -16,7 +16,7 @@ import { buildReport } from '../../services/pdfServices'
 
 
 
-const ClauseBreakdown = ({ data, file }: { data: Record<string, ClauseCardProps[]>; file: string }) => {
+const ClauseBreakdown = ({ data, file, loading, error }: { data: Record<string, ClauseCardProps[]>; file: string; loading: boolean; error: string | null }) => {
     const [page, setPage] = useState(1)
     const pageSize = 4
     const [ruling, setRuling] = useState(Object.keys(data)[0] ?? 'riba')
@@ -43,7 +43,7 @@ const ClauseBreakdown = ({ data, file }: { data: Record<string, ClauseCardProps[
 
             <div className="w-full flex items-center justify-between mb-6">
                 {Object.keys(data).length > 0 && (
-                    <Button onClick={() => downloadPDF(data, file)} variant="outline" size="sm" className="export-button cursor-pointer">
+                    <Button disabled={loading} onClick={() => downloadPDF(data, file)} variant="outline" size="sm" className="export-button cursor-pointer">
                         <Download /> Export Report
                     </Button>
                 )}
@@ -62,66 +62,70 @@ const ClauseBreakdown = ({ data, file }: { data: Record<string, ClauseCardProps[
                     ))}
                 </div>
             </div>
+            <div className={`w-full h-auto flex flex-col items-center justify-start ${loading ? "opacity-50 pointer-events-none" : ""}`}>
+                <h3 className="text-(--accent-color) text-sm font-bold mb-4">Analysis of {file}</h3>
+                {error ? (
+                    <p className="text-(--non-compliant) text-xs text-center">{error}</p>
+                ) : null}
+                {visibleClauses.length > 0 ? (<>
+                    <div className="grid w-full grid-cols-1 gap-5 sm:grid-cols-2">
+                        {visibleClauses?.map((clause) => <ClauseCard {...clause} />)}
+                    </div>
 
-            <h3 className="text-(--accent-color) text-sm font-bold mb-4">Analysis of {file}</h3>
-            {visibleClauses.length > 0 ? (<>
-                <div className="grid w-full grid-cols-1 gap-5 sm:grid-cols-2">
-                    {visibleClauses?.map((clause) => <ClauseCard {...clause} />)}
-                </div>
-
-                {pageCount > 1 && (
-                    <Pagination className="mt-7">
-                        <PaginationContent>
-                            <PaginationItem>
-                                <PaginationPrevious
-                                    href="#seminar-library"
-                                    aria-disabled={page === 1}
-                                    className={page === 1 ? "pointer-events-none opacity-40" : undefined}
-                                    onClick={(event) => {
-                                        event.preventDefault();
-                                        if (page > 1) setPage((current) => current - 1);
-                                    }}
-                                />
-                            </PaginationItem>
-                            {Array.from({ length: pageCount }, (_, index) => {
-                                const pageNumber = index + 1;
-                                return (
-                                    <PaginationItem key={pageNumber}>
-                                        <PaginationLink
-                                            href="#seminar-library"
-                                            isActive={page === pageNumber}
-                                            onClick={(event) => {
-                                                event.preventDefault();
-                                                setPage(pageNumber);
-                                            }}
-                                        >
-                                            {pageNumber}
-                                        </PaginationLink>
-                                    </PaginationItem>
-                                );
-                            })}
-                            <PaginationItem>
-                                <PaginationNext
-                                    href="#seminar-library"
-                                    aria-disabled={page === pageCount}
-                                    className={page === pageCount ? "pointer-events-none opacity-40" : undefined}
-                                    onClick={(event) => {
-                                        event.preventDefault();
-                                        if (page < pageCount) setPage((current) => current + 1);
-                                    }}
-                                />
-                            </PaginationItem>
-                        </PaginationContent>
-                    </Pagination>
+                    {pageCount > 1 && (
+                        <Pagination className="mt-7">
+                            <PaginationContent>
+                                <PaginationItem>
+                                    <PaginationPrevious
+                                        href="#seminar-library"
+                                        aria-disabled={page === 1}
+                                        className={page === 1 ? "pointer-events-none opacity-40" : undefined}
+                                        onClick={(event) => {
+                                            event.preventDefault();
+                                            if (page > 1) setPage((current) => current - 1);
+                                        }}
+                                    />
+                                </PaginationItem>
+                                {Array.from({ length: pageCount }, (_, index) => {
+                                    const pageNumber = index + 1;
+                                    return (
+                                        <PaginationItem key={pageNumber}>
+                                            <PaginationLink
+                                                href="#seminar-library"
+                                                isActive={page === pageNumber}
+                                                onClick={(event) => {
+                                                    event.preventDefault();
+                                                    setPage(pageNumber);
+                                                }}
+                                            >
+                                                {pageNumber}
+                                            </PaginationLink>
+                                        </PaginationItem>
+                                    );
+                                })}
+                                <PaginationItem>
+                                    <PaginationNext
+                                        href="#seminar-library"
+                                        aria-disabled={page === pageCount}
+                                        className={page === pageCount ? "pointer-events-none opacity-40" : undefined}
+                                        onClick={(event) => {
+                                            event.preventDefault();
+                                            if (page < pageCount) setPage((current) => current + 1);
+                                        }}
+                                    />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
+                    )}
+                
+                </>) :
+                
+                (
+                    <p className="text-center text-muted-foreground text-xs md:text-sm">
+                        No clauses relevant to {ruling} found.
+                    </p>
                 )}
-            
-            </>) :
-            
-            (
-                <p className="text-center text-muted-foreground text-xs md:text-sm">
-                    No clauses relevant to {ruling} found.
-                </p>
-            )}
+            </div>
             
 
             
