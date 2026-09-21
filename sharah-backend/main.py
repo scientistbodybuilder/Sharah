@@ -1,7 +1,7 @@
 """FastAPI app entry point for SHARAH backend."""
 
 import logging
-import os, json
+import os, json, asyncio
 import fitz  # PyMuPDF
 # from io import BytesIO
 from langchain_core.documents import Document
@@ -281,8 +281,16 @@ async def stream(file: UploadFile = File(...)):
                     for chunk, similarity, chunk_page in similar_chunks:
                         llm_response = await llm_verification_v1(ruling, chunk.page_content, chunk_page)
                         yield json.dumps(llm_response) + "\n"
+                        await asyncio.sleep(1)
 
-            return StreamingResponse(stream_llm_response(), media_type="application/json")
+            return StreamingResponse(
+                stream_llm_response(), 
+                media_type="application/json",
+                headers={
+                    "Cache-Control": "no-cache",
+                    "Connection": "keep-alive",
+                }
+                )
   
             
     except Exception as e:
