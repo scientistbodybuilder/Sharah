@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   FileText,
   FolderOpen,
@@ -9,17 +9,20 @@ import {
 } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner"
 import { Button } from "./ui/button";
-import { uploadFile, hashFile } from '../services/uploadServices'
+import { 
+  hashFile 
+} from '../hooks/useAnalyzeFile'
 import ClauseBreakdown from './analyze/ClauseBreakdown'
 import RecentUploadSheet from './analyze/RecentUploadSheet'
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 
 import type { ClauseCardProps } from './analyze/ClauseCard'
+import useAnalyzeFile from "@/hooks/useAnalyzeFile";
 
-interface ErrorTypes {
-  file?: string
-  analyze?: string
-}
+// interface ErrorTypes {
+//   file?: string
+//   analyze?: string
+// }
 
 
 
@@ -29,10 +32,13 @@ const Analyze = () => {
   const [fileName, setFileName] = useState("");
   const [displayFileName, setDisplayFileName] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [errors, setErrors] = useState<ErrorTypes>({});
-  // const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<Record<string, ClauseCardProps[]>>({});
   const [existingCachedData, setExistingCachedData] = useState<Record<string, ClauseCardProps[]> | null>(null);
+  const [fileTypeError, setFileTypeError] = useState<string | null>(null);
+  const [analyze, setAnalyze] = useState(false);
+  const [results, setResults] = useState<Record<string, ClauseCardProps[]>>({});
+
+  const { done, loading, error } = useAnalyzeFile(selectedFile, !!existingCachedData, analyze, setResults);
+  // const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
   const handleFile = (file?: File) => {
     if (file && file.type === 'application/pdf') {
@@ -53,30 +59,38 @@ const Analyze = () => {
 
       
     } else {
-      setErrors({ ...errors, file: "Please upload a valid PDF file." });
+      setFileTypeError("Please upload a valid PDF file.");
     }
   };
 
-  const { mutate: analyzeFile, isPending } = useMutation({
-      mutationFn: (file: File) => uploadFile(file, !!existingCachedData),
-      onSuccess: (data) => {
-          console.log('analyze result:', data)
-          setResults(data.data)
-          setDisplayFileName(fileName)
-          queryClient.setQueryData(['analysis', data.hash], data.data)
-          setSelectedFile(null)
-          setFileName("")
-      },
-      onError: (err) => {
-          console.error('Error uploading file:', err)
-          setErrors({ ...errors, analyze: "Error analyzing file." })
-      },
-  })
+  // const { mutate: analyzeFile, isPending } = useMutation({
+  //     mutationFn: (file: File) => uploadFile(file, !!existingCachedData),
+  //     onSuccess: (data) => {
+  //         console.log('analyze result:', data)
+  //         setResults(data.data)
+  //         setDisplayFileName(fileName)
+  //         queryClient.setQueryData(['analysis', data.hash], data.data)
+  //         setSelectedFile(null)
+  //         setFileName("")
+  //     },
+  //     onError: (err) => {
+  //         console.error('Error uploading file:', err)
+  //         setErrors({ ...errors, analyze: "Error analyzing file." })
+  //     },
+  // })
+
+  useEffect(() => {
+    if (done) {
+      setAnalyze(false)
+    }
+  }, [done])
 
   const handleAnalyze = () => {
       if (selectedFile) {
         // 
-        analyzeFile(selectedFile)
+        setAnalyze(true)
+        setDisplayFileName(selectedFile.name)
+
         setExistingCachedData(null) // reset
       }
   }
@@ -169,14 +183,14 @@ const Analyze = () => {
             onChange={(event) => handleFile(event.target.files?.[0])}
           />
         </div>
-          {errors?.file && <p className="text-(--non-compliant) text-xs text-center">{errors.file}.</p>}
+          {fileTypeError && <p className="text-(--non-compliant) text-xs text-center">{fileTypeError}.</p>}
 
         {existingCachedData && <p className="text-muted-foreground text-xs text-center">
           Cached data found for this file. Click <span onClick={() => retrieveExistingCache()} className="text-(--accent-color) hover:text-(--accent-light) hover:underline cursor-pointer">here</span> to retrieve. Otherwise, click "Analyze" to re-analyze.
         </p>}
 
-        <Button onClick={() => handleAnalyze()} disabled={selectedFile === null || isPending} className='bg-(--accent-color) w-full rounded-md cursor-pointer hover:bg-(--accent-color)/90'>
-            { isPending ? <Spinner /> : "Analyze" }
+        <Button onClick={() => handleAnalyze()} disabled={selectedFile === null || loading} className='bg-(--accent-color) w-full rounded-md cursor-pointer hover:bg-(--accent-color)/90'>
+            { loading ? <Spinner /> : "Analyze" }
         </Button>
 
         <div className="feature-grid">
@@ -193,8 +207,8 @@ const Analyze = () => {
         </div>
       </section>
 
-      {displayFileName != "" && Object.keys(results).length > 0 && (
-        <ClauseBreakdown data={results} file={displayFileName} />
+      {displayFileName != "" && results != null && Object.keys(results).length > 0 && (
+        <ClauseBreakdown data={results} file={displayFileName} loading={loading} error={error} />
       )}
     </main>
   );
