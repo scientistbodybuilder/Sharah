@@ -41,7 +41,6 @@ text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
 # CORS: allow frontend origins (local + production)
 _origins = [
     "http://localhost:5173",
-    "https://sharah-theta.vercel.app",
     frontend_url
 ]
 print("origins:", _origins)
