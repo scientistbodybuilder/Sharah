@@ -3,7 +3,6 @@
 **Sharah** is a Shariah compliance validation tool for financial products, focusing on student loans. Users upload a PDF document, and Sharah analyzes them against Islamic finance principles in real-time.
 
 ## Technologies
----
 ### Frontend
 * `Vite`
 * `React.js`
@@ -17,18 +16,15 @@
 * `Groq AI API`
 
 ## Features
----
 With Sharah you can
 - Upload a PDF file to analyze for shariah compliance based on AAOIFI Shariah Standards.
 - Have Analysis results streamed to you in real time.
 - Have results be automatically cached during your session, allowing you to see your upload history and view past analyses.
 
 ## Architecture
----
 ![Architecture](architecture.png)
 
 ## What we learned
----
 ### RAG:
 - Retrieval quality depends on both the knowledge base and the retrieval step. We focused on primarily basing our knowledge base on AAOIFI Shariah Standards, and enriched them with definitions of non-english words as well as relevant examples.
 
@@ -43,13 +39,11 @@ With Sharah you can
 
 
 ## How can it be improved?
----
 - **Improve document coverage:** Add additional support for images.
 - **Harden the API:** Add authentication and rate limiting for users
 
 
 ## Running the project
----
 To run the project in your local environment, follow these steps:
 - Clone the repository to your local machine.
 - Run `npm install` in the client directory to install the required frontend dependencies.
