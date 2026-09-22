@@ -47,7 +47,7 @@ export default function useAnalyzeFile (file: File | null, reUpload: boolean, an
                 //     }
                 // });
 
-                const response = await fetch(`${API_URL}/api/pipeline-stream`, {
+                const response = await fetch(`${API_URL}/api/pipeline-stream-v2`, {
                     method: 'POST',
                     body: formData,
                 });
