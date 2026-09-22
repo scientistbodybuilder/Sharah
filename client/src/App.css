@@ -14,10 +14,10 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.96);
+  /* background: rgba(255, 255, 255, 0.96); */
+  background: #fff8f3;
 }
 .brand-lockup,
-.header-actions,
 .title-line,
 .panel-intro,
 .sample-row,
@@ -83,7 +83,7 @@
   border-radius: 50%;
   background: var(--accent-light);
 }
-.analyze-page {
+.analyze-page, .landing-page {
   /* min-height: calc(100svh - 52px); */
   padding: 0 20px 54px;
   background: var(--background-color);

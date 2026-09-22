@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import './App.css'
 
 import Analyze from './components/Analyze';
+import Landing from './components/Landing'
 // import Gallery from './components/gallery/Gallery';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
       <Header />
       <div>
         <Routes>
+          <Route path="/" element={<Landing />} />
           <Route path="/analyze" element={<Analyze />} />
           <Route path="*" element={<Navigate to="/analyze" replace />} />
         </Routes>

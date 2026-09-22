@@ -1,9 +1,14 @@
 // import { Bell, Download, Moon } from "lucide-react";
 // import { Button } from "./ui/button";
-
+import { HashLink } from 'react-router-hash-link'
+import { useLocation } from 'react-router-dom'
+import MobileNavigation from './MobileNavigation'
+import { Button } from '@/components/ui/button'
 const Header = () => {
+  const location = useLocation();
+  console.log('location: ', location.pathname)
   return (
-    <header className="site-header">
+    <header className="site-header relative">
       <div className="brand-lockup">
         <img src="/sharah-logo.png" alt="Sharah Logo" className="brand-mark" />
         <div>
@@ -15,28 +20,19 @@ const Header = () => {
           </div>
         </div>
       </div>
-      <div className="header-actions">
-        {/* <Button
-          variant="outline"
-          size="icon"
-          aria-label="Toggle theme"
-          className="header-icon-button"
-        >
-          <Moon />
-        </Button> */}
-        {/* <Button variant="outline" size="sm" className="export-button cursor-pointer">
-          <Download /> Export Report
-        </Button> */}
-        {/* <Button
-          variant="outline"
-          size="icon"
-          aria-label="Notifications"
-          className="header-icon-button notification-button cursor-pointer"
-        >
-          <Bell />
-          <i />
-        </Button> */}
+      <div className="md:flex items-center gap-4 hidden">
+          <HashLink className={`text-xs sm:text-sm font-medium rounded-xl px-3 py-1 text-(--accent-color) cursor-pointer hover:text-(--accent-light) ${location.pathname === '/' ? 'bg-(--accent-color)/15' : ''}`} smooth to="/">
+            Home
+          </HashLink>
+
+          <HashLink className={`text-xs sm:text-sm font-medium rounded-xl px-3 py-1 text-(--accent-color) cursor-pointer hover:text-(--accent-light) ${location.pathname === '/analyze' ? 'bg-(--accent-color)/15' : ''}`} smooth to="/analyze">
+            Analyze
+          </HashLink>
       </div>
+      <MobileNavigation />
+      <Button className="hidden md:block text-white text-xs sm:text-sm bg-(--accent-color)/80 rounded-[36px] py-1! px-3! hover:bg-(--accent-color)/70 cursor-pointer">
+        Sign In
+      </Button>
     </header>
   );
 };

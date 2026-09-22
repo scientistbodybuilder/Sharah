@@ -22,7 +22,7 @@ const Footer = () => {
     //     }
     // }
     return(
-        <footer className="bg-(--background-dark) border border-t-(--accent-color)/40 py-1 px-3 h-auto min-h-[140px] box-border w-full text-(--accent-color)">
+        <footer className="bg-[#fff8f3] border border-t-(--accent-color)/40 py-1 px-3 h-auto min-h-[140px] box-border w-full text-(--accent-color)">
             <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}
