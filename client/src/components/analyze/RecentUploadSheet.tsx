@@ -23,11 +23,11 @@ const RecentUploadSheet  = ({ setResults, setFileName }: RecentUploadSheetProps)
     const queryClient = useQueryClient();
     const { user } = useUser();
     const getCachedUploadData = (file: string, hash: string) => {
-        console.log('A')
+        // console.log('A')
         const data = queryClient.getQueryData(['analysis', hash]);
-        console.log(`Fetching cached data for ${file}:`, data);
+        // console.log(`Fetching cached data for ${file}:`, data);
         if (data) {
-            console.log(`Cached data found for ${file}:`, data);
+            // console.log(`Cached data found for ${file}:`, data);
             setResults(data);
             setFileName(file);
         }

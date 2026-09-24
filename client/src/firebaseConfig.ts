@@ -1,5 +1,5 @@
 // Import the functions you need from the SDKs you need
-const test = false
+const test = true
 const API_URL = test ? 'http://localhost:8000' : import.meta.env.VITE_API_URL ?? 'http://localhost:8000' 
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
@@ -43,7 +43,7 @@ export const signIn = async () => {
       const result = await signInWithPopup(auth, provider);
 
       // Retrieve the Firebase ID token
-      console.log('sign in result:', result);
+      // console.log('sign in result:', result);
       const idToken = await result.user.getIdToken();
 
       
@@ -58,7 +58,7 @@ export const signIn = async () => {
 
       const data = await response.json();
 
-      console.log(data);
+      // console.log(data);
 
       //add to the context
       // setUser(result.user);

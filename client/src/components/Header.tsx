@@ -17,7 +17,7 @@ const Header = () => {
   // const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, login } = useUser();
-  console.log('user: ', user)
+  // console.log('user: ', user)
 
   const auth = async () => {
     if (user?.uid) {
