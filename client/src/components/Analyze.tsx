@@ -42,14 +42,14 @@ const Analyze = () => {
   const queryClient = useQueryClient();
   const handleFile = (file?: File) => {
     if (file && file.type === 'application/pdf') {
-      console.log('File selected:', file);
+      // console.log('File selected:', file);
       setFileName(file.name);
       setSelectedFile(file);
       //  check whether the same file is already cached
       const hash = hashFile(file,false, user?.uid || '');
-      console.log('cache hash:', hash);
+      // console.log('cache hash:', hash);
       const cachedData = queryClient.getQueryData(['analysis', hash]);
-      console.log('cached data:', cachedData);
+      // console.log('cached data:', cachedData);
       if (cachedData) {
           setExistingCachedData(cachedData as Record<string, ClauseCardProps[]>);
           // setFileName(file.name);

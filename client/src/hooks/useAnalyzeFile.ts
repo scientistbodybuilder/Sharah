@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useQueryClient } from "@tanstack/react-query"
 import type { ClauseCardProps } from '../components/analyze/ClauseCard'
 
-const test = false
+const test = true
 const API_URL = test ? 'http://localhost:8000' : import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
 export const hashFile = (file: File, reUpload: boolean, uid: string, dateTime?: string) => {
@@ -81,7 +81,7 @@ export default function useAnalyzeFile (file: File | null, reUpload: boolean, ui
                         if (!line.trim()) continue;
                         // Process each line of JSON data
                         const parsed = JSON.parse(line)
-                        console.log('Streamed data: ', parsed)
+                        // console.log('Streamed data: ', parsed)
                         if (parsed?.done) {
                             // Handle done signal
                             remainingCredits = parsed?.remaining_credits
