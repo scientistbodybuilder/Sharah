@@ -5,9 +5,9 @@ import type { ClauseCardProps } from '../components/analyze/ClauseCard'
 const test = false
 const API_URL = test ? 'http://localhost:8000' : import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
-export const hashFile = (file: File, reUpload: boolean, dateTime?: string) => {
+export const hashFile = (file: File, reUpload: boolean, uid: string, dateTime?: string) => {
     // const dateTime = dateTime || new Date().toLocaleString()
-    const string_key = reUpload ? `${file.name}-${file.size}-${file.lastModified}-${dateTime}` : `${file.name}-${file.size}-${file.lastModified}`;
+    const string_key = reUpload ? `${file.name}-${file.size}-${file.lastModified}-${uid}-${dateTime}` : `${file.name}-${file.size}-${file.lastModified}-${uid}`;
 
     let hash = 0x811c9dc5;
     for (let i = 0; i < string_key.length; i++) {
@@ -19,7 +19,16 @@ export const hashFile = (file: File, reUpload: boolean, dateTime?: string) => {
     return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
-export default function useAnalyzeFile (file: File | null, reUpload: boolean, analyze: boolean, setResults: (data: Record<string, ClauseCardProps[]>) => void) {
+export const hashId = (uid: string) => {
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < uid.length; i++) {
+        hash ^= uid.charCodeAt(i);
+        hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+    }
+    return (hash >>> 0).toString(16).padStart(8, '0');
+}
+
+export default function useAnalyzeFile (file: File | null, reUpload: boolean, uid: string, analyze: boolean, setResults: (data: Record<string, ClauseCardProps[]>) => void, updateCredits: (credits: number) => void) {
     const [done, setDone] = useState<boolean>(false)
     const [data, setData] = useState<Record<string, ClauseCardProps[]> | null>(null)
     const [error, setError] = useState<string | null>(null)
@@ -36,9 +45,10 @@ export default function useAnalyzeFile (file: File | null, reUpload: boolean, an
             setLoading(true)
             const formData = new FormData();
             formData.append("file", file);
+            formData.append("uid", uid);
 
             let accumulated: Record<string, ClauseCardProps[]> = {}; // local, not state
-
+            let remainingCredits = 0;
             try {
                 // const response = await axios.post(`${API_URL}/api/pipeline-stream`, formData, {
                 //     headers: {
@@ -72,17 +82,23 @@ export default function useAnalyzeFile (file: File | null, reUpload: boolean, an
                         // Process each line of JSON data
                         const parsed = JSON.parse(line)
                         console.log('Streamed data: ', parsed)
+                        if (parsed?.done) {
+                            // Handle done signal
+                            remainingCredits = parsed?.remaining_credits
+                            continue
+
+                        }
                         let obj = {
-                            chunk: parsed?.metadata.chunk,
-                            chunkPage: parsed?.metadata.chunk_page,
-                            ruling: parsed?.metadata.ruling,
+                            chunk: parsed?.metadata?.chunk,
+                            chunkPage: parsed?.metadata?.chunk_page,
+                            ruling: parsed?.metadata?.ruling,
                             confidence: parsed?.confidence,
                             suggestion: parsed?.suggestion,
                             summary: parsed?.summary,
                             reasoning: parsed?.reasoning,
                             citation: parsed?.citation
                         }
-                        const ruling = parsed?.metadata.ruling
+                        const ruling = parsed?.metadata?.ruling
 
                         accumulated = {
                             ...accumulated,
@@ -100,16 +116,17 @@ export default function useAnalyzeFile (file: File | null, reUpload: boolean, an
                 const dateTime = new Date().toLocaleString()
                 let hash
                 if (reUpload) {
-                    hash = hashFile(file, reUpload, dateTime)
+                    hash = hashFile(file, reUpload, uid, dateTime)
                 } else {
-                    hash = hashFile(file, reUpload)
+                    hash = hashFile(file, reUpload, uid)
                 }
                 
                 queryClient.setQueryData(['analysis', hash], accumulated)
                 const keyObj = {
                     hash,
                     filename: file.name,
-                    timestamp: dateTime
+                    timestamp: dateTime,
+                    id: hashId(uid)
                 }
                 //current keys
                 const currentKeys = sessionStorage.getItem('recentUploads')
@@ -121,6 +138,9 @@ export default function useAnalyzeFile (file: File | null, reUpload: boolean, an
                 //end
                 setDone(true)
                 setLoading(false)
+                updateCredits(remainingCredits)
+                //update credits?
+
 
                 // response.data.on('data', (chunk: Buffer) => {
                 //     // Handle streaming data
@@ -170,7 +190,7 @@ export default function useAnalyzeFile (file: File | null, reUpload: boolean, an
         return () => controller.abort()
 
 
-    },[file, reUpload, analyze])
+    },[file, reUpload, uid, analyze])
 
     return { done, data, error, loading }
 

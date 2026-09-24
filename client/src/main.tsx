@@ -5,6 +5,7 @@ import { persistQueryClient } from '@tanstack/react-query-persist-client'
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
 import './index.css'
 import App from './App.tsx'
+import { UserProvider } from './context.tsx'
 
 const queryClient = new QueryClient()
 queryClient.setQueryDefaults(['analysis'], { gcTime: Infinity })
@@ -18,8 +19,11 @@ persistQueryClient({
 })
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
+    <UserProvider>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </UserProvider>
+    
   </StrictMode>,
 )

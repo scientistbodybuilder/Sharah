@@ -1,4 +1,4 @@
-
+import SampleClauseBreakdown from './landing/SampleClauseBreakdown'
 
 const Landing = () => {
 
@@ -10,6 +10,8 @@ const Landing = () => {
                 <p className="text-xs md:text-sm text-center text-(--muted-foreground) max-w-2/3 md:max-w-1/2">
                      Sharah uses an fine-tuned AI pipeline to parse loan agreements clause-by-clause to detect hidden Riba, Gharar, and predatory compounding terms. 
                 </p>
+
+                <SampleClauseBreakdown  />
             </section>
         </main>
 

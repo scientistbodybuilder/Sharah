@@ -5,6 +5,7 @@ import './App.css'
 
 import Analyze from './components/Analyze';
 import Landing from './components/Landing'
+import ProtectedRoute from './ProtectedRoute'
 // import Gallery from './components/gallery/Gallery';
 
 function App() {
@@ -15,7 +16,10 @@ function App() {
       <div>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/analyze" element={<Analyze />} />
+          <Route path="/analyze" element={<ProtectedRoute>
+              <Analyze />
+          </ProtectedRoute>
+            } />
           <Route path="*" element={<Navigate to="/analyze" replace />} />
         </Routes>
       </div>
