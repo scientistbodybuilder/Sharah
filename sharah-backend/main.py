@@ -4,13 +4,23 @@ import os, json, asyncio
 import fitz  # PyMuPDF
 # from io import BytesIO
 from langchain_core.documents import Document
+from datetime import date
 from dotenv import load_dotenv
 
-from fastapi import FastAPI, File, Request, UploadFile, HTTPException
+from fastapi import FastAPI, File, Form, Header, Request, UploadFile, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
 from fastapi.responses import JSONResponse, StreamingResponse
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from transformers import AutoTokenizer
+
+# firebase auth
+import firebase_admin
+from firebase_admin import auth, credentials
+#firestore
+from firebase_admin import firestore
+# from google.cloud.firestore_v1.base_query import FieldFilter
 
 from engine.engine import llm_verification_v1
 from engine.rulings import rulings
@@ -23,12 +33,21 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 frontend_url=os.getenv("FRONTEND_URL")
+BASE_CREDITS = int(os.getenv("BASE_CREDITS"))
+cred_json = json.loads(os.getenv("SERVICE_ACCOUNT_KEY_JSON"))
+cred = credentials.Certificate(cred_json)
+
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+
 
 app = FastAPI(
-    title="SHARAH API",
-    description="Shariah compliance validation for Islamic financial products",
+    title="Sharah API",
+    description="Shariah compliance validation for Student Loan Agreements",
     version="1.0.0",
 )
+security = HTTPBearer()
 
 tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
 text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
@@ -50,6 +69,62 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# fire base helpers
+
+def create_user(uid: str, email: str, name: str, picture: str):
+    doc_ref = db.collection("users").document(uid)
+    doc_ref.set({
+        "name": name,
+        "email": email,
+        "picture": picture,
+        "credits": BASE_CREDITS,
+        "base_credits": BASE_CREDITS,
+        "last_reset_date": date.today().isoformat()
+    })
+    print("Document written successfully.")
+
+def use_credit(uid: str):
+    doc_ref = db.collection("users").document(uid)
+    data = doc_ref.get().to_dict()
+    current_credits = data.get("credits")
+    if current_credits > 0:
+        doc_ref.update({"credits": firestore.Increment(-1)})
+        
+
+def get_or_reset_credits(uid: str):
+    doc_ref = db.collection("users").document(uid)
+    data = doc_ref.get().to_dict()
+    current_credits = data.get("credits")
+    last_reset_date = data.get("last_reset_date")
+
+    if last_reset_date != date.today().isoformat():
+        doc_ref.update({"credits": BASE_CREDITS, "last_reset_date": date.today().isoformat()})
+        return BASE_CREDITS
+    return current_credits
+
+def get_current_user(res: HTTPAuthorizationCredentials = Depends(security)):
+
+    token = res.credentials
+
+    try:
+
+        # Verify the integrity and authenticity of the token
+
+        decoded_token = auth.verify_id_token(token, clock_skew_seconds=10)
+
+        return decoded_token
+
+    except Exception as e:
+        print("Error occurred while verifying token:", repr(e))
+        raise HTTPException(
+
+            status_code=status.HTTP_401_UNAUTHORIZED,
+
+            detail="Invalid or expired token"
+
+        )
+
 
 
 def get_chunk_page(chunk: str, text_pages: list) -> int:
@@ -195,6 +270,41 @@ def parse_pdf_text(file_bytes: bytes) -> str:
 #             detail=f"An unexpected error occurred: {str(e)}"
 #         )
 
+@app.get("/api/secure")
+def secure_endpoint(user: dict = Depends(get_current_user)):
+    uid = user.get("uid")
+
+    email = user.get("email")
+
+    name = user.get("name")  # Provided by Google Sign-In
+
+    picture = user.get("picture")
+
+    # check if the user is in the data base
+    user_ref = db.collection("users").document(uid)
+    user_doc = user_ref.get()
+    if not user_doc.exists:
+        create_user(uid, email, name, picture)
+
+    current_credits = get_or_reset_credits(uid)
+
+
+
+
+    return {
+
+        "uid": uid,
+
+        "email": email,
+
+        "name": name,
+
+        "picture": picture,
+
+        "credits": current_credits
+
+    }
+
 
 
 
@@ -303,7 +413,10 @@ async def stream(file: UploadFile = File(...)):
         )
 
 @app.post("/api/pipeline-stream-v2")
-async def stream(file: UploadFile = File(...)):
+async def stream(
+    file: UploadFile = File(...),
+    uid: str = Form(...),
+):
     if not file.filename.lower().endswith('.pdf'):
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload a PDF file.")
 
@@ -314,6 +427,9 @@ async def stream(file: UploadFile = File(...)):
     async def stream_llm_response():
         
         async with processing_semaphore:
+            # consume credit
+            use_credit(uid)
+            # begin processing
             extracted_text, text_pages = parse_pdf_text(file_bytes)
             if not extracted_text.strip():
                 yield json.dumps({"error": "No text could be extracted from the PDF."}) + "\n"
@@ -339,6 +455,8 @@ async def stream(file: UploadFile = File(...)):
                     llm_response = await llm_verification_v1(ruling, chunk.page_content, chunk_page)
                     yield json.dumps(llm_response) + "\n"
                     await asyncio.sleep(1)
+
+            yield json.dumps({"done": True,"remaining_credits": get_or_reset_credits(uid)}) + "\n"
 
     return StreamingResponse(
         stream_llm_response(),

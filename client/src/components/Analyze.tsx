@@ -18,7 +18,7 @@ import { useQueryClient } from "@tanstack/react-query"
 
 import type { ClauseCardProps } from './analyze/ClauseCard'
 import useAnalyzeFile from "@/hooks/useAnalyzeFile";
-
+import { useUser } from '@/context'
 // interface ErrorTypes {
 //   file?: string
 //   analyze?: string
@@ -36,8 +36,8 @@ const Analyze = () => {
   const [fileTypeError, setFileTypeError] = useState<string | null>(null);
   const [analyze, setAnalyze] = useState(false);
   const [results, setResults] = useState<Record<string, ClauseCardProps[]>>({});
-
-  const { done, loading, error } = useAnalyzeFile(selectedFile, !!existingCachedData, analyze, setResults);
+  const { user, updateCredits } = useUser();
+  const { done, loading, error } = useAnalyzeFile(selectedFile, !!existingCachedData, user?.uid || '', analyze, setResults, updateCredits);
   // const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
   const handleFile = (file?: File) => {
@@ -46,7 +46,7 @@ const Analyze = () => {
       setFileName(file.name);
       setSelectedFile(file);
       //  check whether the same file is already cached
-      const hash = hashFile(file,false);
+      const hash = hashFile(file,false, user?.uid || '');
       console.log('cache hash:', hash);
       const cachedData = queryClient.getQueryData(['analysis', hash]);
       console.log('cached data:', cachedData);
@@ -189,7 +189,7 @@ const Analyze = () => {
           Cached data found for this file. Click <span onClick={() => retrieveExistingCache()} className="text-(--accent-color) hover:text-(--accent-light) hover:underline cursor-pointer">here</span> to retrieve. Otherwise, click "Analyze" to re-analyze.
         </p>}
 
-        <Button onClick={() => handleAnalyze()} disabled={selectedFile === null || loading} className='bg-(--accent-color) w-full rounded-md cursor-pointer hover:bg-(--accent-color)/90'>
+        <Button onClick={() => handleAnalyze()} disabled={selectedFile === null || loading || user?.credits === 0} className='bg-(--accent-color) w-full rounded-md cursor-pointer hover:bg-(--accent-color)/90'>
             { loading ? <Spinner /> : "Analyze" }
         </Button>
 
@@ -198,7 +198,7 @@ const Analyze = () => {
             Evaluates Documents against Shariah Standards No. 19 &amp; 31.
           </Feature>
           <Feature icon={<ScanLine />} title="Instant Clause Breakdown">
-            Processes agreements in under 30 seconds, flagging prohibited,
+            Processes agreements in real-time, flagging prohibited,
             conditional, and permissible terms.
           </Feature>
           <Feature icon={<FolderOpen />} title="Exportable Scholarly Memo">
