@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useQueryClient } from "@tanstack/react-query"
 import type { ClauseCardProps } from '../components/analyze/ClauseCard'
 
-const test = true
+const test = false
 const API_URL = test ? 'http://localhost:8000' : import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
 export const hashFile = (file: File, reUpload: boolean, uid: string, dateTime?: string) => {
