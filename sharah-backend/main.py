@@ -7,7 +7,7 @@ from langchain_core.documents import Document
 from datetime import date
 from dotenv import load_dotenv
 
-from fastapi import FastAPI, File, Form, Header, Request, UploadFile, HTTPException, Depends, status
+from fastapi import FastAPI, File, Form, Request, UploadFile, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
@@ -33,6 +33,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 frontend_url=os.getenv("FRONTEND_URL")
+vercel_url=os.getenv("VERCEL_URL")
 BASE_CREDITS = int(os.getenv("BASE_CREDITS"))
 cred_json = json.loads(os.getenv("SERVICE_ACCOUNT_KEY_JSON"))
 cred = credentials.Certificate(cred_json)
@@ -59,7 +60,8 @@ text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
 
 _origins = [
     "http://localhost:5173",
-    frontend_url
+    frontend_url,
+    vercel_url
 ]
 print("origins:", _origins)
 app.add_middleware(
@@ -308,109 +310,109 @@ def secure_endpoint(user: dict = Depends(get_current_user)):
 
 
 
-@app.post("/api/pipeline-stream")
-async def stream(file: UploadFile = File(...)):
-    """
-    Embed a PDF document for further processing.
+# @app.post("/api/pipeline-stream")
+# async def stream(file: UploadFile = File(...)):
+#     """
+#     Embed a PDF document for further processing.
 
-    """
-    print("STREAM ENDPOINT")
-    # Validate file type
-    if not file.filename.lower().endswith('.pdf'):
-        logger.warning(f"Invalid file type uploaded: {file.filename}")
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid file type. Please upload a PDF file."
-        )
+#     """
+#     print("STREAM ENDPOINT")
+#     # Validate file type
+#     if not file.filename.lower().endswith('.pdf'):
+#         logger.warning(f"Invalid file type uploaded: {file.filename}")
+#         raise HTTPException(
+#             status_code=400,
+#             detail="Invalid file type. Please upload a PDF file."
+#         )
 
-    try:
-            # get the embeddings for the shariah rules
-            ruling_keys = rulings.keys()
-            ruling_embeddings = {}
-            ruling_chunk_matching = {}
-            ruling_llm_response = {}
-            for key in ruling_keys:
-                ruling_embeddings[key] = get_ruling_embeddings(key)
-                ruling_chunk_matching[key] = []
-                ruling_llm_response[key] = []
+#     try:
+#             # get the embeddings for the shariah rules
+#             ruling_keys = rulings.keys()
+#             ruling_embeddings = {}
+#             ruling_chunk_matching = {}
+#             ruling_llm_response = {}
+#             for key in ruling_keys:
+#                 ruling_embeddings[key] = get_ruling_embeddings(key)
+#                 ruling_chunk_matching[key] = []
+#                 ruling_llm_response[key] = []
             
 
-            #print("ruling embeddings: ", ruling_embeddings)
-            # Read file contents
-            logger.info(f"Processing file: {file.filename}")
-            file_bytes = await file.read()
+#             #print("ruling embeddings: ", ruling_embeddings)
+#             # Read file contents
+#             logger.info(f"Processing file: {file.filename}")
+#             file_bytes = await file.read()
             
-            if not file_bytes:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Empty file uploaded."
-                )
+#             if not file_bytes:
+#                 raise HTTPException(
+#                     status_code=400,
+#                     detail="Empty file uploaded."
+#                 )
             
-            # Parse PDF text
-            logger.debug("Parsing PDF text...")
-            try:
-                extracted_text, text_pages = parse_pdf_text(file_bytes)
-                # print("extracted text: ", extracted_text)
-            except Exception as pdf_error:
-                logger.error(f"PDF parsing error: {str(pdf_error)}")
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Failed to parse PDF: {str(pdf_error)}"
-                )
+#             # Parse PDF text
+#             logger.debug("Parsing PDF text...")
+#             try:
+#                 extracted_text, text_pages = parse_pdf_text(file_bytes)
+#                 # print("extracted text: ", extracted_text)
+#             except Exception as pdf_error:
+#                 logger.error(f"PDF parsing error: {str(pdf_error)}")
+#                 raise HTTPException(
+#                     status_code=400,
+#                     detail=f"Failed to parse PDF: {str(pdf_error)}"
+#                 )
             
-            if not extracted_text.strip():
-                raise HTTPException(
-                    status_code=400,
-                    detail="No text could be extracted from the PDF. The file may be empty or contain only images."
-                )
+#             if not extracted_text.strip():
+#                 raise HTTPException(
+#                     status_code=400,
+#                     detail="No text could be extracted from the PDF. The file may be empty or contain only images."
+#                 )
             
-            logger.info(f"Extracted {len(extracted_text)} characters from PDF")
-            # logger.debug(f"First 500 chars: {extracted_text[:500]}")
-            # here we have the extracted text, we should break it into chunks and embed each
-            all_splits = text_splitter.split_documents([Document(page_content=extracted_text)])
-            # print("We have", len(all_splits), "splits for the document")
+#             logger.info(f"Extracted {len(extracted_text)} characters from PDF")
+#             # logger.debug(f"First 500 chars: {extracted_text[:500]}")
+#             # here we have the extracted text, we should break it into chunks and embed each
+#             all_splits = text_splitter.split_documents([Document(page_content=extracted_text)])
+#             # print("We have", len(all_splits), "splits for the document")
 
-            #iterate through the chunks
-            for chunk in all_splits:
-                chunk_embedding = embed_document_chunk(chunk.page_content)
-                chunk_page = get_chunk_page(chunk.page_content, text_pages)
-                        # print("Embedded chunk with length:", len(chunk.page_content))
-                for ruling in ruling_keys:
-                    similarity = max_ruling_chunk_similarity(chunk_embedding, ruling_embeddings[ruling])
-                    # print("similarity:", similarity)
-                    if (similarity > 0.5):  # Adjust threshold as needed
-                        ruling_chunk_matching[ruling].append((chunk, similarity, chunk_page))
+#             #iterate through the chunks
+#             for chunk in all_splits:
+#                 chunk_embedding = embed_document_chunk(chunk.page_content)
+#                 chunk_page = get_chunk_page(chunk.page_content, text_pages)
+#                         # print("Embedded chunk with length:", len(chunk.page_content))
+#                 for ruling in ruling_keys:
+#                     similarity = max_ruling_chunk_similarity(chunk_embedding, ruling_embeddings[ruling])
+#                     # print("similarity:", similarity)
+#                     if (similarity > 0.5):  # Adjust threshold as needed
+#                         ruling_chunk_matching[ruling].append((chunk, similarity, chunk_page))
 
-            # print("ruling chunk matching: ", ruling_chunk_matching)
-            # sort the similarities and keep top X
-            async def stream_llm_response():
-                for ruling in ruling_keys:
-                    similar_chunks = sorted(ruling_chunk_matching[ruling], key=lambda x: x[1], reverse=True)[:10]
-                    # print(f"sorted similarity for ruling '{ruling}': ", [s for _, s, _ in similar_chunks])
-                    # for each chunk, use the LLM to verify whether it is a violation of the ruling
-                    # print(f"Similar chunks for ruling '{ruling}':")
-                    for chunk, similarity, chunk_page in similar_chunks:
-                        llm_response = await llm_verification_v1(ruling, chunk.page_content, chunk_page)
-                        yield json.dumps(llm_response) + "\n"
-                        await asyncio.sleep(1)
+#             # print("ruling chunk matching: ", ruling_chunk_matching)
+#             # sort the similarities and keep top X
+#             async def stream_llm_response():
+#                 for ruling in ruling_keys:
+#                     similar_chunks = sorted(ruling_chunk_matching[ruling], key=lambda x: x[1], reverse=True)[:10]
+#                     # print(f"sorted similarity for ruling '{ruling}': ", [s for _, s, _ in similar_chunks])
+#                     # for each chunk, use the LLM to verify whether it is a violation of the ruling
+#                     # print(f"Similar chunks for ruling '{ruling}':")
+#                     for chunk, similarity, chunk_page in similar_chunks:
+#                         llm_response = await llm_verification_v1(ruling, chunk.page_content, chunk_page)
+#                         yield json.dumps(llm_response) + "\n"
+#                         await asyncio.sleep(1)
 
-            return StreamingResponse(
-                stream_llm_response(), 
-                media_type="application/json",
-                headers={
-                    "Cache-Control": "no-cache",
-                    "Connection": "keep-alive",
-                }
-                )
+#             return StreamingResponse(
+#                 stream_llm_response(), 
+#                 media_type="application/json",
+#                 headers={
+#                     "Cache-Control": "no-cache",
+#                     "Connection": "keep-alive",
+#                 }
+#                 )
   
             
-    except Exception as e:
-        # Catch any unexpected errors
-        logger.exception(f"Unexpected error processing file: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"An unexpected error occurred: {str(e)}"
-        )
+#     except Exception as e:
+#         # Catch any unexpected errors
+#         logger.exception(f"Unexpected error processing file: {str(e)}")
+#         raise HTTPException(
+#             status_code=500,
+#             detail=f"An unexpected error occurred: {str(e)}"
+#         )
 
 @app.post("/api/pipeline-stream-v2")
 async def stream(
