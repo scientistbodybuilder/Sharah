@@ -1,5 +1,5 @@
 // Import the functions you need from the SDKs you need
-const test = true
+const test = false
 const API_URL = test ? 'http://localhost:8000' : import.meta.env.VITE_API_URL ?? 'http://localhost:8000' 
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
