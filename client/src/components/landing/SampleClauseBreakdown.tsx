@@ -107,7 +107,7 @@ const SampleClauseBreakdown = () => {
                 </div>
             </div>
             <div className={`w-full h-auto flex flex-col items-center justify-start`}>
-                <h3 className="text-(--accent-color) text-sm font-medium mb-4 italic">"Analysis of my loan agreement."</h3>
+                <h3 className="text-(--accent-color) text-sm font-medium mb-4 italic">"Analysis of a sample loan agreement."</h3>
  
                 {sampleData[ruling]?.length > 0 && (<>
                     <div className="grid w-full grid-cols-1 gap-5 sm:grid-cols-2">
