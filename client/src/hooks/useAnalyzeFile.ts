@@ -37,6 +37,7 @@ export default function useAnalyzeFile (file: File | null, reUpload: boolean, ui
 
     useEffect(() => {
         if (file === null || !analyze) return
+        console.log('LOW TEMP START TIME: ', new Date())
         const controller = new AbortController();
         const streamAnalysis = async () => {
             setDone(false)
@@ -81,7 +82,7 @@ export default function useAnalyzeFile (file: File | null, reUpload: boolean, ui
                         if (!line.trim()) continue;
                         // Process each line of JSON data
                         const parsed = JSON.parse(line)
-                        // console.log('Streamed data: ', parsed)
+                        console.log('Streamed data: ', parsed)
                         if (parsed?.done) {
                             // Handle done signal
                             remainingCredits = parsed?.remaining_credits
@@ -183,6 +184,7 @@ export default function useAnalyzeFile (file: File | null, reUpload: boolean, ui
                 console.error('Error uploading file with stream:', err)
                 setError('Error analyzing file')
             } finally {
+                console.log('LOW TEMP END TIME: ', new Date())
             }
         }
         streamAnalysis()

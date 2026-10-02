@@ -22,7 +22,7 @@ from firebase_admin import auth, credentials
 from firebase_admin import firestore
 # from google.cloud.firestore_v1.base_query import FieldFilter
 
-from engine.engine import llm_verification_v1
+from engine.engine import llm_verification_v1, llm_verification_v2
 from engine.rulings import rulings
 from engine.sentence_embeddings import get_ruling_embeddings, embed_document_chunk, max_ruling_chunk_similarity
 processing_semaphore = asyncio.Semaphore(1)
@@ -31,6 +31,7 @@ load_dotenv()
 logging.basicConfig(
     level=logging.DEBUG if os.getenv("DEBUG", "false").lower() == "true" else logging.INFO
 )
+logging.getLogger("groq").propagate = False
 logger = logging.getLogger(__name__)
 frontend_url=os.getenv("FRONTEND_URL")
 vercel_url=os.getenv("VERCEL_URL")
