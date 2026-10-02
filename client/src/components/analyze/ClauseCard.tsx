@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { CircleCheck, CircleX, SlidersHorizontal } from "lucide-react"
+import { CircleCheck, CircleX, Info, SlidersHorizontal } from "lucide-react"
 
 export interface ClauseCardProps {
     confidence: number
@@ -52,6 +52,13 @@ function SuggestionIcon (suggestion: string) {
                 color: "(--uncertain)",
                 badge: "border-(--uncertain) bg-(--uncertain)/30",
                 text: "text-(--uncertain)",
+            }
+        case "ERROR":
+            return {
+                icon: <Info color="var(--non-compliant)" className="h-4 w-4 m-0" />,
+                color: "(--non-compliant)",
+                badge: "border-(--non-compliant) bg-(--non-compliant)/30",
+                text: "text-(--non-compliant)",
             }
         default:
             return {
@@ -97,7 +104,7 @@ const ClauseCard = ({ confidence, ruling, summary, reasoning, citation, suggesti
                             <p className="text-muted-foreground text-sm"><span className="text-black font-semibold">Ruling:</span> {ruling.toUpperCase()}</p>
                             <p className={`text-muted-foreground text-sm font-semibold`}><span className="text-black font-semibold">Confidence:</span> {confidence}%</p>
                             <p className="text-muted-foreground text-sm"><span className="text-black font-semibold">Reasoning:</span> {reasoning}</p>
-                            <p className="text-muted-foreground text-sm"><span className="text-black font-semibold">Citation:</span> {citation}</p>
+                            <p className="text-muted-foreground text-sm"><span className="text-black font-semibold">Citation:</span> {citation || "N/A"}</p>
                         </DialogDescription>
                     </DialogContent>
                 </Dialog>

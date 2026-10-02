@@ -52,8 +52,8 @@ const Header = () => {
       </div>
       <MobileNavigation /> */}
       <div className="flex items-center gap-2">
-        {user?.uid && user?.credits && (
-          <p className="text-xs m-0 text-(--acccent-color)">Daily Credits Remaining: <span className="text-sm font-bold text-(--accent-light)">{user?.credits || 0}</span></p>
+        {user?.uid && user?.credits != null && (
+          <p className="text-xs m-0 text-(--acccent-color)">Daily Credits Remaining: <span className="text-sm font-bold text-(--accent-light)">{user.credits || 0}</span></p>
         )}
 
 
