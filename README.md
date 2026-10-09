@@ -1,5 +1,5 @@
 # Sharah
-**Sharah** is a Shariah compliance validation tool for financial products, focusing on student loans. Users upload a PDF document, and Sharah analyzes them against Islamic finance principles in real-time.
+**Sharah** is a Shariah compliance validation tool for financial products, focusing on student loans. Users upload a PDF document, and Sharah analyzes them against Islamic finance principles in real-time. Try it at https://www.sharah.tech/.
 
 ## Technologies
 ### Frontend
