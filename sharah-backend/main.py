@@ -62,7 +62,9 @@ text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
 _origins = [
     "http://localhost:5173",
     frontend_url,
-    vercel_url
+    vercel_url,
+    "https://www.sharah.tech",
+    "https://sharah.tech"
 ]
 print("origins:", _origins)
 app.add_middleware(
